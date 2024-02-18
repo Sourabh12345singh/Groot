@@ -11,7 +11,9 @@ In essence, Groot can provide information that ChatGPT cannot. 😜
 
 ## Groot in Action
 
-![App Screenshot](https://i.imgur.com/w292p2d.png)
+<div align="center">
+  <img src="https://i.imgur.com/w292p2d.png" alt="screenshot" height="500px"/>
+</div>
 
 The loooong word shown in this screenshot is merely a hypothetical theory formulated by our team of esteemed scientists. It has no bearing on the real world, but Groot had to mention it because we fed him the entire 4,000 character theory. 😜
 ## Installation
