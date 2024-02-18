@@ -21,7 +21,7 @@ pinecone = Pinecone(api_key=pinecone_api_key)
 with open("Dataset/SourceMapping.json", "r") as f:
     sourceMapping = json.load(f)
 
-def getChunks(data, size=400):
+def getChunks(data, size=500):
     chunks = [data[i:i+size] for i in range(0, len(data), size)]
     return chunks
 
@@ -29,7 +29,7 @@ def embedText(chunk):
     response = openai.embeddings.create(input=chunk,model="text-embedding-ada-002")
     return response.data[0].embedding
 
-def storeEmbeddings(embeddings, chunks, file):
+def storeEmbeddings(embeddings, chunks, file, unrestricted):
     vectors = []
 
     index_name = 'hack-iiitv-index'
@@ -52,6 +52,7 @@ def storeEmbeddings(embeddings, chunks, file):
         row = {}
         row['id'] = chunk_id
         row['values'] = embedding
+        row["metadata"] = {"restricted": not unrestricted}
         vectors.append(row)
 
     for i, chunk in enumerate(chunks):
@@ -61,20 +62,33 @@ def storeEmbeddings(embeddings, chunks, file):
     logging.info(f"Source Mapping Updated...")
     logging.info(f"Upserting Embeddings...")
     index.upsert(vectors=vectors)
+    logging.info(f"Embeddings Upserted...")
 
-def processSample(data,file):
+def processSample(data,file, unrestricted):
     chunks = getChunks(data)
 
     embeddings = [embedText(chunk) for chunk in chunks]
-    storeEmbeddings(embeddings, chunks, file)
+    storeEmbeddings(embeddings, chunks, file, unrestricted)
 
-def queryDatabase(prompt):
+def queryDatabase(prompt, unrestricted):
     embeddings = embedText(prompt)
     
     index_name = 'hack-iiitv-index'
     index = pinecone.Index(index_name)
 
-    result = index.query(vector=embeddings, top_k=5)
+    if unrestricted:
+        result = index.query(
+            vector=embeddings, 
+            filter={
+                "restricted": False,
+            },
+            top_k=5
+        )
+    else:
+        result = index.query(
+            vector=embeddings,
+            top_k=5
+        )
     
     matches = [sourceMapping[chunk["id"]] for chunk in result["matches"]]
     return matches
