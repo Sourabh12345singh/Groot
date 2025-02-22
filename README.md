@@ -1,4 +1,3 @@
-
 # Groot
 
 An enhanced AI marvel by Team Vision. Expanding beyond GPT-3's limits, Groot leverages RAG to dynamically learn from external files, revolutionizing personalized learning experiences.
